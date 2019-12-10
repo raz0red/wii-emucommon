@@ -1,0 +1,50 @@
+//---------------------------------------------------------------------------//
+//                                                                           //
+//  wii-emucommon:                                                           //
+//  Wii emulator common code                                                 //
+//                                                                           //
+//  [github.com/raz0red/wiicolem]                                            //
+//                                                                           //
+//---------------------------------------------------------------------------//
+//                                                                           //
+//  Copyright (C) 2019 raz0red                                               //
+//                                                                           //
+//  This program is free software; you can redistribute it and/or            //
+//  modify it under the terms of the GNU General Public License              //
+//  as published by the Free Software Foundation; either version 2           //
+//  of the License, or (at your option) any later version.                   //
+//                                                                           //
+//  This program is distributed in the hope that it will be useful,          //
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of           //
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            //
+//  GNU General Public License for more details.                             //
+//                                                                           //
+//  You should have received a copy of the GNU General Public License        //
+//  along with this program; if not, write to the Free Software              //
+//  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA            //
+//  02110-1301, USA.                                                         //
+//---------------------------------------------------------------------------//
+
+#ifndef WII_HASH_H
+#define WII_HASH_H
+
+#include <gctypes.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * Computes the hash of the specified source
+ *
+ * @param   source The source to calculate the hash for
+ * @param   length The length of the source
+ * @param   result The string to receive the result of the hash computation
+ */
+void wii_hash_compute(const u8* source, u32 length, char result[33]);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
