@@ -3,7 +3,7 @@
 
 # wii-emucommon
 
-This repository contains common code that is shared between my Wii emulators (It is not a general purpose library).
+This repository contains common code that is shared between the Wii emulators (It is not a general purpose library).
 
 * A simple front-end and menuing system
 * Modified SDL library (video changes)
