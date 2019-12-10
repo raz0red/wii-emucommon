@@ -1,4 +1,4 @@
-[submodule "thirdparty/sdl"]
-	path = thirdparty/sdl
+[submodule "sdl"]
+	path = sdl
 	url = https://github.com/raz0red/sdl-wii.git
 	branch = video-mods

@@ -30,7 +30,7 @@
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 DATE="$( date '+%Y%m%d%H%S' )"
 DIST_DIR=$SCRIPTPATH/dist
-SDL_DIR=$SCRIPTPATH/thirdparty/sdl
+SDL_DIR=$SCRIPTPATH/sdl
 
 #
 # Function that is invoked when the script fails.

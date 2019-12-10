@@ -59,8 +59,8 @@ INCLUDES	:= \
     i18n/include \
     netprint/include \
     pngu/include \
-    thirdparty/sdl/SDL/include \
-    thirdparty/sdl/SDL_ttf/include
+    sdl/SDL/include \
+    sdl/SDL_ttf/include
 
 #---------------------------------------------------------------------------------
 # options for code generation
