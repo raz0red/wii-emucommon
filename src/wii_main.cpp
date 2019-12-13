@@ -107,7 +107,7 @@ BOOL wii_usb_keepalive = FALSE;
 /** Trap filter */
 BOOL wii_trap_filter = FALSE;
 /** 16:9 correction */
-BOOL wii_16_9_correction = FALSE;
+BOOL wii_16_9_correction = WS_AUTO;
 
 /** The about image data */
 static gx_imagedata* about_idata = NULL;
