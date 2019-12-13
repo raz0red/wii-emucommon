@@ -31,6 +31,7 @@
 
 #include <wiiuse/wpad.h>
 
+#include "fileop.h"
 #include "wii_input.h"
 #include "wii_main.h"
 #include "wii_hw_buttons.h"
@@ -46,6 +47,9 @@
 /** The base application path */
 static char app_path[WII_MAX_PATH] = "";
 
+/** The initial rom to execute (Wiiflow) */
+char wii_initial_rom[WII_MAX_PATH] = "";
+
 /** The most recent status message */
 char wii_status_message[WII_MENU_BUFF_SIZE] = "";
 
@@ -57,7 +61,7 @@ BOOL wii_is_usb = FALSE;
 
 /**
  * Updates the specified result string with the location of the file relative to
- * the appliation root directory.
+ * the application root directory.
  *
  * @param   file The file name
  * @param   result The buffer to store the result in
@@ -76,21 +80,66 @@ char* wii_get_app_path() {
 }
 
 /**
- * Determines and stores the base application path
+ * Attempts to find the "data drive" (contains the roms, config files, etc.).
+ *
+ * @param preferredFilePath A path containing the drive prefix that is preferred
+ */
+static BOOL find_and_mount_data_drive(const char* preferredFilePath) {
+    DIR* dir;
+    BOOL success = FALSE;
+    BOOL checkUsb = strncasecmp("usb", preferredFilePath, 3) == 0;
+    char dataDirPath[WII_MAX_PATH] = "";
+    const char* dataDir = wii_get_data_path();  // Dir w/o file system prefix
+
+    if (!dataDir) {
+        // No data directory is required by the application
+        success = TRUE;
+    } else {
+        for (int i = 0; !success && i < 2; i++) {
+            // Generate path
+            snprintf(dataDirPath, sizeof(dataDirPath), "%s:%s",
+                     (checkUsb ? "usb" : "sd"), dataDir);
+            // Mount drive
+            if (ChangeInterface(dataDirPath, FS_RETRY_COUNT)) {
+                // Attempt to find the data path
+                if ((dir = opendir(dataDirPath)) != NULL) {
+                    closedir(dir);
+#ifdef WII_NETTRACE
+                    net_print_string(__FILE__, __LINE__,
+                                     "Found data path: %s\n", dataDirPath);
+#endif
+                    // Mark whether the data is on the usb or sd
+                    wii_is_usb = checkUsb;
+                    // Exit the check loop
+                    success = TRUE;
+                }
+            }
+            checkUsb = !checkUsb;
+        }
+    }
+
+    return success;
+}
+
+/**
+ * Processes the application arguments
  *
  * @param   argc The count of main arguments
  * @param   argv The array of argument values
+ * @return  Whether the processing was successful
  */
-void wii_set_app_path(int argc, char* argv[]) {
-    snprintf(app_path, WII_MAX_PATH, "%s", wii_get_app_base_dir());
+BOOL wii_process_app_args(int argc, char* argv[]) {
+    char message[255] = "";
+    BOOL success = TRUE;
 
+    // Handle application path
+    snprintf(app_path, WII_MAX_PATH, "%s", wii_get_app_base_dir());
     if ((argc > 0) && (argv[0] != NULL) &&
         (strchr(argv[0], ':') != NULL))  // To support wiiload
     {
 #ifdef WII_NETTRACE
         net_print_string(__FILE__, __LINE__, "Found drive prefix\n");
 #endif
-
         char temp_path[WII_MAX_PATH];
         snprintf(temp_path, WII_MAX_PATH, "%s", argv[0]);
 
@@ -114,9 +163,33 @@ void wii_set_app_path(int argc, char* argv[]) {
 #endif
     }
 
-    if (strncasecmp("usb", app_path, 3) == 0) {
-        wii_is_usb = TRUE;
+    // Handle initial rom (Wiiflow)
+    if ((argc > 1) && argv[1] != NULL) {
+        snprintf(wii_initial_rom, WII_MAX_PATH, "%s", argv[1]);
     }
+
+    // Attempt to mount application drive
+    if (!ChangeInterface(app_path, FS_RETRY_COUNT)) {
+        snprintf(message, sizeof(message),
+                 "Unable to mount file system for application: %s", app_path);
+        wii_display_console_message_and_pause(message);
+        success = FALSE;
+    }
+
+    if (success) {
+        // Attempt to find the data drive and mount it
+        success = find_and_mount_data_drive(
+            wii_initial_rom[0] != '\0' ? wii_initial_rom : app_path);
+
+        if (!success) {
+            snprintf(message, sizeof(message),
+                     "Unable to find and mount data drive");
+            wii_display_console_message_and_pause(message);
+            success = FALSE;
+        }
+    }
+
+    return success;
 }
 
 /**

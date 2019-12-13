@@ -872,7 +872,7 @@ int wii_vsync_enabled() {
 }
 
 #ifdef WII_NETTRACE
-static int __out_write(struct _reent* r, int fd, const char* ptr, size_t len) {
+static int __out_write(struct _reent* r, void* fd, const char* ptr, size_t len) {
     if (!ptr || len <= 0) {
         return -1;
     }
@@ -907,6 +907,22 @@ const devoptab_t dot_out = {
 #endif
 
 /**
+ * Displays the specified message to the console and pauses. This method is
+ * typically invoked to display an error message prior to the video sub-system
+ * being intialized.
+ *
+ * @param   message The message to display
+ */
+void wii_display_console_message_and_pause(const char* message) {
+    CON_Init(xfb[0], 20, 20, vmode->fbWidth, vmode->xfbHeight,
+             vmode->fbWidth * VI_DISPLAY_PIX_SZ);
+    printf("\x1b[5;0H");
+    printf("%s\n\n", message);
+    printf("Press A to exit...");
+    wii_pause();
+}
+
+/**
  * Main
  *
  * @param   argc Argument count
@@ -917,10 +933,13 @@ int main(int argc, char* argv[]) {
     char localip[16] = {0};
     char gateway[16] = {0};
     char netmask[16] = {0};
-    if_config(localip, netmask, gateway, TRUE);
+    if_config(localip, netmask, gateway, TRUE, 10);
 
     // First arg represents IP address for remote tracing
-    net_print_init((argc > 1 ? argv[1] : NULL), 0);
+    // TODO: No longer supported due to WIiflow support 
+    //       (maybe add flag to distinguish)
+    //net_print_init((argc > 1 ? argv[1] : NULL), 0);
+    net_print_init(NULL, 0);
 
     int i;
     for (i = 0; i < argc; i++) {
@@ -933,56 +952,41 @@ int main(int argc, char* argv[]) {
     devoptab_list[STD_ERR] = &dot_out;
 #endif
 
-    // printf( "\x1b[5;0H" );
-
     main_argc = argc;
     main_argv = argv;
 
-    // Initialize the Wii
-    wii_set_app_path(argc, argv);
+    // Handle application arguments
+    if (wii_process_app_args(argc, argv)) {
+        
+        WPAD_Init();
+        PAD_Init();
 
-    // Try to mount the file system
-    if (!ChangeInterface(wii_get_app_path(), FS_RETRY_COUNT)) {
-        CON_Init(xfb[0], 20, 20, vmode->fbWidth, vmode->xfbHeight,
-                 vmode->fbWidth * VI_DISPLAY_PIX_SZ);
-        printf("\x1b[5;0H");
-        printf("Unable to mount %s\n\n", wii_get_fs_prefix());
-        printf("Press A to exit...");
-        wii_pause();
-#ifdef WII_NETTRACE
-        net_print_close();
-#endif
-        exit(0);  // unable to mount file system
+        // Set the hardware callbacks
+        wii_register_hw_buttons();
+
+        // Clear the stack
+        memset(&wii_menu_stack, 0, sizeof(wii_menu_stack));
+
+        // Determine widescreen auto value
+        is_widescreen = (CONF_GetAspectRatio() == CONF_ASPECT_16_9);
+
+        // Initializes the application
+        init_app();
+
+        // Test for PAL/NTSC
+        wii_test_pal();
+
+        if (wii_vsync == -1) {
+            // Set the vsync based on whether or not we are PAL or NTSC
+            wii_set_vsync(!wii_is_pal);
+        }
+
+        // Runs the application
+        wii_handle_run();
+
+        // Frees the application resources
+        free_resources();
     }
-
-    WPAD_Init();
-    PAD_Init();
-
-    // Set the hardware callbacks
-    wii_register_hw_buttons();
-
-    // Clear the stack
-    memset(&wii_menu_stack, 0, sizeof(wii_menu_stack));
-
-    // Determine widescreen auto value
-    is_widescreen = (CONF_GetAspectRatio() == CONF_ASPECT_16_9);
-
-    // Initializes the application
-    init_app();
-
-    // Test for PAL/NTSC
-    wii_test_pal();
-
-    if (wii_vsync == -1) {
-        // Set the vsync based on whether or not we are PAL or NTSC
-        wii_set_vsync(!wii_is_pal);
-    }
-
-    // Runs the application
-    wii_handle_run();
-
-    // Frees the application resources
-    free_resources();
 
 #ifdef WII_NETTRACE
     net_print_close();

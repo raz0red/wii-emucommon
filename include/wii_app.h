@@ -37,6 +37,9 @@ extern "C" {
 /** The most recent status message */
 extern char wii_status_message[WII_MENU_BUFF_SIZE];
 
+/** The initial rom to execute (Wiiflow) */
+extern char wii_initial_rom[WII_MAX_PATH];
+
 /** The status message display count down */
 extern u32 wii_status_message_count;
 
@@ -60,12 +63,13 @@ void wii_get_app_relative(const char* file, char* result);
 char* wii_get_app_path();
 
 /**
- * Determines and stores the base application path
+ * Processes the application arguments
  *
  * @param   argc The count of main arguments
  * @param   argv The array of argument values
+ * @return  Whether the processing was successful
  */
-void wii_set_app_path(int argc, char* argv[]);
+BOOL wii_process_app_args(int argc, char* argv[]);
 
 /**
  * Pause and wait for input. Usually used when debugging.

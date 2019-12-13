@@ -66,6 +66,7 @@ INCLUDES	:= \
 # options for code generation
 #---------------------------------------------------------------------------------
 CFLAGS	=   -g -O1 -Wall $(MACHDEP) $(INCLUDE) -DWII_BIN2O
+#-DWII_NETTRACE
 CXXFLAGS	=	$(CFLAGS)
 LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
 
@@ -92,7 +93,6 @@ CPPFILES    := \
     wii_app.cpp \
     wii_config.cpp \
     wii_freetype.cpp \
-    wii_file_io.cpp \
     wii_gx.cpp \
     wii_hash.cpp \
     wii_hw_buttons.cpp \

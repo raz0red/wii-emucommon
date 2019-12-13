@@ -226,6 +226,15 @@ void wii_menu_show();
  */
 s16 wii_menu_get_current_index();
 
+/**
+ * Displays the specified message to the console and pauses. This method is
+ * typically invoked to display an error message prior to the video sub-system
+ * being intialized.
+ *
+ * @param   message The message to display
+ */
+void wii_display_console_message_and_pause(const char* message);
+
 //
 // Methods to be implemented by application
 //
@@ -338,6 +347,13 @@ int wii_get_nodetype_spacer();
  * @return  The rom node type
  */
 int wii_get_nodetype_rom();
+
+/**
+ * Returns the location of the data directory
+ * 
+ * @return  The location of the data directory
+ */
+const char* wii_get_data_path();
 
 extern const u8 about_png_end[];
 extern const u8 about_png[];
