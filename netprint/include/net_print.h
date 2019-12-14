@@ -11,7 +11,7 @@ int net_print_string(const char* file, int line, const char* format, ...);
 int net_print_binary(int format, const void* binary, int len);
 
 #define DEFAULT_NET_PRINT_PORT 5194
-#define DEFAULT_NET_PRINT_HOST_IP "192.168.1.20"
+#define DEFAULT_NET_PRINT_HOST_IP "192.168.1.172"
 
 #ifdef __cplusplus
 }

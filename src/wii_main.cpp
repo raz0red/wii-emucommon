@@ -618,7 +618,7 @@ static void precallback() {
     }
 
     static BOOL lastws = 0;
-    int newws =
+    BOOL newws =
         (wii_full_widescreen == WS_AUTO ? is_widescreen : wii_full_widescreen);
 
     if (lastws != newws) {

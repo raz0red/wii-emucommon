@@ -65,7 +65,9 @@ INCLUDES	:= \
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-CFLAGS	=   -g -O1 -Wall $(MACHDEP) $(INCLUDE) -DWII_BIN2O
+CFLAGS	=   -g -O1 -Wall $(MACHDEP) $(INCLUDE) \
+    -Wno-format-truncation \
+    -DWII_BIN2O
 #-DWII_NETTRACE
 CXXFLAGS	=	$(CFLAGS)
 LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map

@@ -1,12 +1,16 @@
 #include "net_print.h"
 #include <ctype.h>
 #include <network.h>
+#include <SDL_mutex.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+/** Mutex for writing */
+static SDL_mutex* mutex;
 
 /* It opens a connection to the host name rhost that is listening
    on the specified port. It returns the socket descriptor, or -1
@@ -43,6 +47,7 @@ static int _net_print_socket = -1;
 int net_print_init(const char* rhost, unsigned short port) {
     int sk = -1;
     int wd = 0x12345678;
+    mutex = SDL_CreateMutex();
 
     if (_net_print_socket < 0) {
         if (rhost == NULL) {
@@ -68,12 +73,14 @@ int net_print_init(const char* rhost, unsigned short port) {
 }
 
 void net_print_close() {
+    SDL_mutexP(mutex);
     if (_net_print_socket >= 0) {
         net_print_string(__FILE__, __LINE__,
                          "net_print_init() closing socket, socket=%d\n",
                          _net_print_socket);
         net_close(_net_print_socket);
     }
+    SDL_mutexV(mutex);
 }
 
 int net_print_string(const char* file, int line, const char* format, ...) {
@@ -96,7 +103,9 @@ int net_print_string(const char* file, int line, const char* format, ...) {
     len += vsprintf(buffer + len, format, ap);
     va_end(ap);
 
+    SDL_mutexP(mutex);
     ret = net_send(_net_print_socket, buffer, len, 0);
+    SDL_mutexV(mutex);
 
     return ret;
 }

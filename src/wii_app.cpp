@@ -164,8 +164,27 @@ BOOL wii_process_app_args(int argc, char* argv[]) {
     }
 
     // Handle initial rom (Wiiflow)
-    if ((argc > 1) && argv[1] != NULL) {
-        snprintf(wii_initial_rom, WII_MAX_PATH, "%s", argv[1]);
+    if (argc > 1 && argv[1] != NULL) {
+        const char* path = argv[1];
+        int pathLen = strlen(path);
+        if (pathLen > 0) {
+            // Was name passed separately?
+            // Check to see if it has a value with a length and does not start
+            // with usb: or sd:
+            const char* name =
+                (argc > 2 && argv[2] != NULL && strlen(argv[2]) > 0 &&
+                 strncasecmp(argv[2], "usb:", 4) &&
+                 strncasecmp(argv[2], "sd:", 3))
+                    ? argv[2]
+                    : NULL;
+            snprintf(wii_initial_rom, WII_MAX_PATH, "%s%s%s", path,
+                     name && path[pathLen - 1] != '/' ? "/" : "",
+                     name ? name : "");
+#ifdef WII_NETTRACE
+            net_print_string(__FILE__, __LINE__, "Wiiflow initial rom: %s\n",
+                             wii_initial_rom);
+#endif
+        }
     }
 
     // Attempt to mount application drive
