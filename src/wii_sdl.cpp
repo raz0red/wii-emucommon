@@ -255,7 +255,7 @@ void wii_sdl_draw_rectangle(SDL_Surface* surface,
 
     int xo, yo;
     if (exor) {
-        for (xo = x + 1; xo < (w - 1); xo++) {
+        for (xo = x + 1; xo < (x + w - 1); xo++) {
             if (is8)
                 *((u8*)wii_sdl_get_vram_addr(surface, xo, y)) ^= border;
             else if (is16)
@@ -264,16 +264,16 @@ void wii_sdl_draw_rectangle(SDL_Surface* surface,
                 *((u32*)wii_sdl_get_vram_addr(surface, xo, y)) ^= border;
             if (h > 1) {
                 if (is8)
-                    *((u8*)wii_sdl_get_vram_addr(surface, xo, h - 1)) ^= border;
+                    *((u8*)wii_sdl_get_vram_addr(surface, xo, y + h - 1)) ^= border;
                 else if (is16)
-                    *((u16*)wii_sdl_get_vram_addr(surface, xo, h - 1)) ^=
+                    *((u16*)wii_sdl_get_vram_addr(surface, xo, y + h - 1)) ^=
                         border;
                 else
-                    *((u32*)wii_sdl_get_vram_addr(surface, xo, h - 1)) ^=
+                    *((u32*)wii_sdl_get_vram_addr(surface, xo, y + h - 1)) ^=
                         border;
             }
         }
-        for (yo = y; yo < h; yo++) {
+        for (yo = y; yo < (y + h); yo++) {
             if (is8)
                 *((u8*)wii_sdl_get_vram_addr(surface, x, yo)) ^= border;
             else if (is16)
@@ -282,17 +282,17 @@ void wii_sdl_draw_rectangle(SDL_Surface* surface,
                 *((u32*)wii_sdl_get_vram_addr(surface, x, yo)) ^= border;
             if (w > 1) {
                 if (is8)
-                    *((u8*)wii_sdl_get_vram_addr(surface, w - 1, yo)) ^= border;
+                    *((u8*)wii_sdl_get_vram_addr(surface, x + w - 1, yo)) ^= border;
                 else if (is16)
-                    *((u16*)wii_sdl_get_vram_addr(surface, w - 1, yo)) ^=
+                    *((u16*)wii_sdl_get_vram_addr(surface, x + w - 1, yo)) ^=
                         border;
                 else
-                    *((u32*)wii_sdl_get_vram_addr(surface, w - 1, yo)) ^=
+                    *((u32*)wii_sdl_get_vram_addr(surface, x + w - 1, yo)) ^=
                         border;
             }
         }
     } else {
-        for (xo = x + 1; xo < (w - 1); xo++) {
+        for (xo = x + 1; xo < (x + w - 1); xo++) {
             if (is8)
                 *((u8*)wii_sdl_get_vram_addr(surface, xo, y)) = border;
             else if (is16)
@@ -301,14 +301,14 @@ void wii_sdl_draw_rectangle(SDL_Surface* surface,
                 *((u32*)wii_sdl_get_vram_addr(surface, xo, y)) = border;
             if (h > 1) {
                 if (is8)
-                    *((u8*)wii_sdl_get_vram_addr(surface, xo, h - 1)) = border;
+                    *((u8*)wii_sdl_get_vram_addr(surface, xo, y + h - 1)) = border;
                 else if (is16)
-                    *((u16*)wii_sdl_get_vram_addr(surface, xo, h - 1)) = border;
+                    *((u16*)wii_sdl_get_vram_addr(surface, xo, y + h - 1)) = border;
                 else
-                    *((u32*)wii_sdl_get_vram_addr(surface, xo, h - 1)) = border;
+                    *((u32*)wii_sdl_get_vram_addr(surface, xo, y + h - 1)) = border;
             }
         }
-        for (yo = y; yo < h; yo++) {
+        for (yo = y; yo < (y + h); yo++) {
             if (is8)
                 *((u8*)wii_sdl_get_vram_addr(surface, x, yo)) = border;
             else if (is16)
@@ -317,11 +317,11 @@ void wii_sdl_draw_rectangle(SDL_Surface* surface,
                 *((u32*)wii_sdl_get_vram_addr(surface, x, yo)) = border;
             if (w > 1) {
                 if (is8)
-                    *((u8*)wii_sdl_get_vram_addr(surface, w - 1, yo)) = border;
+                    *((u8*)wii_sdl_get_vram_addr(surface, x + w - 1, yo)) = border;
                 else if (is16)
-                    *((u16*)wii_sdl_get_vram_addr(surface, w - 1, yo)) = border;
+                    *((u16*)wii_sdl_get_vram_addr(surface, x + w - 1, yo)) = border;
                 else
-                    *((u32*)wii_sdl_get_vram_addr(surface, w - 1, yo)) = border;
+                    *((u32*)wii_sdl_get_vram_addr(surface, x + w - 1, yo)) = border;
             }
         }
     }
