@@ -54,10 +54,40 @@ static float aratio = 0.0f;
 static float xinc = 0.0f;
 /** The y increment */
 static float yinc = 0.0f;
+/** The screen size */
+static resize_info* resizeinfo = NULL;
+/** The current screen size index */
+static int currsize = -1;
+/** The current width */
+float currentX = 0;
+/** The current height */
+float currentY = 0;
+
 
 #define DELAY_FRAMES 6
 #define DELAY_STEP 1
 #define DELAY_MIN 0
+
+/**
+ * Returns the index of the screen size corresponding to the specified width and
+ * height
+ *
+ * @param   rinfo The resize info
+ * @param   w The width
+ * @param   h The height
+ * @return  The index of the screen size corresponding to the specified width
+ *          and height
+ */
+int wii_resize_screen_find_size(resize_info* rinfo, int w, int h) {
+    for (int i = 0; i < rinfo->size_count; i++) {
+        const screen_size* cur = &(rinfo->sizes[i]);
+        if (cur->w == w && cur->h == h) {
+            return i;
+        }
+    }
+
+    return -1;
+}
 
 /**
  * Resets the aspect ratio
@@ -135,26 +165,23 @@ void wii_resize_render_callback() {
 
     snprintf(buffer, sizeof(buffer), "%s :", gettextmsg("Plus/RTrigger"));
     wii_gx_drawtext(0, y, fontsize, buffer, white, right);
-    wii_gx_drawtext(0, y, fontsize, gettextmsg("Reset to defaults"), white,
-                    left);
-    y -= largespacing;
-
-#if 0
-    snprintf(buffer, sizeof(buffer), " %s", gettextmsg("Toggle screen sizes"));
+    snprintf(buffer, sizeof(buffer), " %s",
+             gettextmsg(resizeinfo->size_count == 1 ? "Reset to defaults"
+                                                    : "Toggle screen sizes"));
     wii_gx_drawtext(0, y, fontsize, buffer, white, left);
     y -= largespacing;
 
     snprintf(buffer, sizeof(buffer), "%s :", gettextmsg("Screen size"));
     wii_gx_drawtext(0, y, fontsize, buffer, white, right);
-    snprintf(buffer, sizeof(buffer), " %s",
-             gettextmsg(resizeinfo->rotated
-                            ? resizeinfo->emulator.getRotatedScreenSizeName(
-                                  currentX, currentY)
-                            : resizeinfo->emulator.getScreenSizeName(
-                                  currentX, currentY)));
+
+    int curr_index =
+        wii_resize_screen_find_size(resizeinfo, currentX, currentY);
+    snprintf(
+        buffer, sizeof(buffer), " %s",
+        gettextmsg((curr_index == -1 ? "Custom"
+                                     : resizeinfo->sizes[curr_index].name)));
     wii_gx_drawtext(0, y, fontsize, buffer, white, left);
     y -= spacing;
-#endif
 
     snprintf(buffer, sizeof(buffer), "%s :", gettextmsg("Aspect ratio"));
     wii_gx_drawtext(0, y, fontsize, buffer, white, right);
@@ -170,8 +197,12 @@ void wii_resize_render_callback() {
  * @param   rinfo Information for the resize operation
  */
 void wii_resize_screen_gui(resize_info* rinfo) {
-    float currentX = rinfo->currentX;
-    float currentY = rinfo->currentY;
+
+    resizeinfo = rinfo;
+
+    currentX = rinfo->currentX;
+    currentY = rinfo->currentY;
+    currsize = wii_resize_screen_find_size(rinfo, currentX, currentY);
 
     arlocked = TRUE;
 
@@ -318,8 +349,13 @@ void wii_resize_screen_gui(resize_info* rinfo) {
         if ((down & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS |
                      WPAD_CLASSIC_BUTTON_FULL_R)) ||
             (gcDown & PAD_TRIGGER_R)) {
-            currentX = rinfo->defaultX;
-            currentY = rinfo->defaultY;
+            currsize++;
+            if (resizeinfo->size_count <= currsize) {
+                currsize = 0;
+            }
+            const screen_size* size = &(resizeinfo->sizes[currsize]);
+            currentX = size->w;
+            currentY = size->h;
             reset_aspect_ratio(currentX, currentY);
         }
 

@@ -35,11 +35,23 @@ extern "C" {
 #endif
 
 /**
+ * Represents a specific screen size
+ */
+typedef struct screen_size {
+    /** The width */
+    u16 w;
+    /** The height */
+    u16 h;
+    /** The name of the specific screen size (2x, etc.) */
+    const char* name;
+} screen_size;
+
+/**
  * Information about the resize operation
  */
 typedef struct resize_info {
-    float defaultX;
-    float defaultY;
+    const screen_size* sizes;
+    int size_count;
     float currentX;
     float currentY;
 } resize_info;
@@ -50,6 +62,18 @@ typedef struct resize_info {
  * @param   rinfo Information for the resize operation
  */
 void wii_resize_screen_gui(resize_info* rinfo);
+
+/**
+ * Returns the index of the screen size corresponding to the specified width and
+ * height
+ *
+ * @param   rinfo The resize info
+ * @param   w The width
+ * @param   h The height
+ * @return  The index of the screen size corresponding to the specified width
+ *          and height
+ */
+int wii_resize_screen_find_size(resize_info* rinfo, int w, int h);
 
 /**
  * Draws a border around the surface that is to be scaled.
