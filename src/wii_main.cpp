@@ -988,6 +988,9 @@ int main(int argc, char* argv[]) {
         free_resources();
     }
 
+    // Stop SMB (if applicable)
+    void CloseShare();
+
 #ifdef WII_NETTRACE
     net_print_close();
 #endif
